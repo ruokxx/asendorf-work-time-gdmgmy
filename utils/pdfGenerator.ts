@@ -18,8 +18,8 @@ export const generatePDF = async (
 
     const htmlContent = generateHTMLContent(entries, userName, title, totalHours);
     
-    // Create HTML file
-    const htmlUri = FileSystem.documentDirectory + 'worktime.html';
+    // Create HTML file using cacheDirectory instead of documentDirectory
+    const htmlUri = (FileSystem.cacheDirectory || '') + 'worktime.html';
     await FileSystem.writeAsStringAsync(htmlUri, htmlContent);
     
     // For now, we'll share the HTML file since react-native-html-to-pdf might have issues

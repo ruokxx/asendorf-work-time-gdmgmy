@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, commonStyles } from '../styles/commonStyles';
 import TimeInput from './TimeInput';
@@ -82,76 +82,90 @@ const WorkTimeForm: React.FC<WorkTimeFormProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={commonStyles.subtitle}>Arbeitszeit erfassen</Text>
-      
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Datum</Text>
-        <TouchableOpacity
-          style={styles.dateButton}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <Text style={styles.dateText}>{formatDate(date)}</Text>
-        </TouchableOpacity>
+    <ScrollView 
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={styles.container}>
+        <Text style={commonStyles.subtitle}>Arbeitszeit erfassen</Text>
         
-        {showDatePicker && (
-          <DateTimePicker
-            value={new Date(date + 'T00:00:00')}
-            mode="date"
-            display="default"
-            onChange={handleDateChange}
-          />
-        )}
-      </View>
-
-      <View style={styles.timeRow}>
-        <TimeInput
-          label="Startzeit"
-          value={startTime}
-          onChange={setStartTime}
-          style={styles.timeInput}
-        />
-        <TimeInput
-          label="Endzeit"
-          value={endTime}
-          onChange={setEndTime}
-          style={styles.timeInput}
-        />
-      </View>
-
-      <TouchableOpacity
-        style={styles.breakToggle}
-        onPress={() => setHasBreak(!hasBreak)}
-      >
-        <View style={[styles.checkbox, hasBreak && styles.checkboxChecked]}>
-          {hasBreak && <Text style={styles.checkmark}>✓</Text>}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Datum</Text>
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={styles.dateText}>{formatDate(date)}</Text>
+          </TouchableOpacity>
+          
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date(date + 'T00:00:00')}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
         </View>
-        <Text style={styles.breakText}>30 Minuten Pause</Text>
-      </TouchableOpacity>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Notizen (optional)</Text>
-        <TextInput
-          style={styles.notesInput}
-          value={notes}
-          onChangeText={setNotes}
-          placeholder="Zusätzliche Informationen..."
-          multiline
-          numberOfLines={3}
-          textAlignVertical="top"
+        <View style={styles.timeRow}>
+          <TimeInput
+            label="Startzeit"
+            value={startTime}
+            onChange={setStartTime}
+            style={styles.timeInput}
+          />
+          <TimeInput
+            label="Endzeit"
+            value={endTime}
+            onChange={setEndTime}
+            style={styles.timeInput}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={styles.breakToggle}
+          onPress={() => setHasBreak(!hasBreak)}
+        >
+          <View style={[styles.checkbox, hasBreak && styles.checkboxChecked]}>
+            {hasBreak && <Text style={styles.checkmark}>✓</Text>}
+          </View>
+          <Text style={styles.breakText}>30 Minuten Pause</Text>
+        </TouchableOpacity>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Notizen (optional)</Text>
+          <TextInput
+            style={styles.notesInput}
+            value={notes}
+            onChangeText={setNotes}
+            placeholder="Zusätzliche Informationen..."
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+          />
+        </View>
+
+        <Button
+          text="Arbeitszeit speichern"
+          onPress={handleSave}
+          style={styles.saveButton}
         />
       </View>
-
-      <Button
-        text="Arbeitszeit speichern"
-        onPress={handleSave}
-        style={styles.saveButton}
-      />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   container: {
     padding: 20,
   },

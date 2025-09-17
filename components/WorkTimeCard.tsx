@@ -2,8 +2,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, commonStyles } from '../styles/commonStyles';
-import { WorkTimeEntry } from '../types/WorkTime';
 import Icon from './Icon';
+import { WorkTimeEntry } from '../types/WorkTime';
 
 interface WorkTimeCardProps {
   entry: WorkTimeEntry;
@@ -22,68 +22,78 @@ const WorkTimeCard: React.FC<WorkTimeCardProps> = ({ entry, onEdit, onDelete }) 
   };
 
   const formatHours = (hours: number): string => {
-    const h = Math.floor(hours);
-    const m = Math.round((hours - h) * 60);
-    return `${h}:${m.toString().padStart(2, '0')}h`;
+    return `${hours.toFixed(1)}h`;
   };
 
   return (
-    <View style={[commonStyles.card, styles.card]}>
-      <View style={styles.header}>
-        <View style={styles.dateContainer}>
+    <View style={styles.card}>
+      <View style={styles.cardContent}>
+        <View style={styles.dateSection}>
           <Text style={styles.date}>{formatDate(entry.date)}</Text>
           <Text style={styles.hours}>{formatHours(entry.totalHours)}</Text>
         </View>
-        <View style={styles.actions}>
-          {onEdit && (
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => onEdit(entry)}
-            >
-              <Icon name="pencil" size={20} color={colors.primary} />
-            </TouchableOpacity>
-          )}
-          {onDelete && (
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => onDelete(entry.id)}
-            >
-              <Icon name="trash" size={20} color={colors.error} />
-            </TouchableOpacity>
+        
+        <View style={styles.timeSection}>
+          <Text style={styles.timeText}>
+            {entry.startTime} - {entry.endTime}
+          </Text>
+          {entry.hasBreak && (
+            <Text style={styles.breakText}>30 Min Pause</Text>
           )}
         </View>
-      </View>
-      
-      <View style={styles.timeRow}>
-        <Text style={styles.timeText}>
-          {entry.startTime} - {entry.endTime}
-        </Text>
-        {entry.hasBreak && (
-          <View style={styles.breakBadge}>
-            <Text style={styles.breakText}>30min Pause</Text>
+        
+        {entry.notes && (
+          <View style={styles.notesSection}>
+            <Text style={styles.notesText} numberOfLines={2}>
+              {entry.notes}
+            </Text>
           </View>
         )}
       </View>
       
-      {entry.notes && (
-        <Text style={styles.notes}>{entry.notes}</Text>
-      )}
+      <View style={styles.actions}>
+        {onEdit && (
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => onEdit(entry)}
+          >
+            <Icon name="pencil" size={20} color={colors.primary} />
+          </TouchableOpacity>
+        )}
+        
+        {onDelete && (
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => onDelete(entry.id)}
+          >
+            <Icon name="trash" size={20} color={colors.error || '#ff4444'} />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
     marginHorizontal: 20,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  header: {
+  cardContent: {
+    flex: 1,
+    padding: 16,
+  },
+  dateSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
-  },
-  dateContainer: {
-    flex: 1,
   },
   date: {
     fontSize: 16,
@@ -91,42 +101,41 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   hours: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: colors.primary,
   },
-  actions: {
-    flexDirection: 'row',
-  },
-  actionButton: {
-    padding: 8,
-    marginLeft: 8,
-  },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+  timeSection: {
+    marginBottom: 4,
   },
   timeText: {
     fontSize: 14,
     color: colors.textSecondary,
-  },
-  breakBadge: {
-    backgroundColor: colors.warning,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
+    marginBottom: 2,
   },
   breakText: {
     fontSize: 12,
-    color: 'white',
-    fontWeight: '500',
-  },
-  notes: {
-    fontSize: 14,
     color: colors.textSecondary,
     fontStyle: 'italic',
+  },
+  notesSection: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  notesText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 18,
+  },
+  actions: {
+    flexDirection: 'row',
+    paddingRight: 16,
+  },
+  actionButton: {
+    padding: 8,
+    marginLeft: 8,
   },
 });
 

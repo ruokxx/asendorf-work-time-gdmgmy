@@ -4,34 +4,17 @@ import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { commonStyles, colors } from '../styles/commonStyles';
 import { useWorkTimeData } from '../hooks/useWorkTimeData';
-import WorkTimeForm from '../components/WorkTimeForm';
 import WorkTimeCard from '../components/WorkTimeCard';
 import Button from '../components/Button';
-import SimpleBottomSheet from '../components/BottomSheet';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 export default function MainScreen() {
   const {
     entries,
     userSettings,
     loading,
-    saveEntry,
-    updateEntry,
     deleteEntry,
   } = useWorkTimeData();
-
-  const [showForm, setShowForm] = useState(false);
-
-  const handleSaveEntry = async (entryData: any) => {
-    try {
-      await saveEntry(entryData);
-      setShowForm(false);
-      Alert.alert('Erfolg', 'Arbeitszeit wurde erfolgreich gespeichert.');
-    } catch (error) {
-      console.error('Error saving entry:', error);
-      Alert.alert('Fehler', 'Arbeitszeit konnte nicht gespeichert werden.');
-    }
-  };
 
   const handleDeleteEntry = (id: string) => {
     Alert.alert(
@@ -46,6 +29,16 @@ export default function MainScreen() {
         },
       ]
     );
+  };
+
+  const handleEditEntry = (entryId: string) => {
+    console.log('Editing entry:', entryId);
+    router.push(`/add-entry?entryId=${entryId}`);
+  };
+
+  const handleAddEntry = () => {
+    console.log('Adding new entry');
+    router.push('/add-entry');
   };
 
   const getTodaysEntries = () => {
@@ -108,7 +101,7 @@ export default function MainScreen() {
         <View style={commonStyles.section}>
           <Button
             text="+ Arbeitszeit erfassen"
-            onPress={() => setShowForm(true)}
+            onPress={handleAddEntry}
             style={styles.primaryButton}
           />
         </View>
@@ -137,6 +130,7 @@ export default function MainScreen() {
               <WorkTimeCard
                 key={entry.id}
                 entry={entry}
+                onEdit={() => handleEditEntry(entry.id)}
                 onDelete={handleDeleteEntry}
               />
             ))}
@@ -154,17 +148,6 @@ export default function MainScreen() {
           </View>
         )}
       </ScrollView>
-
-      <SimpleBottomSheet
-        isVisible={showForm}
-        onClose={() => setShowForm(false)}
-      >
-        <WorkTimeForm
-          onSave={handleSaveEntry}
-          defaultStartTime={userSettings.defaultStartTime}
-          defaultEndTime={userSettings.defaultEndTime}
-        />
-      </SimpleBottomSheet>
     </SafeAreaView>
   );
 }

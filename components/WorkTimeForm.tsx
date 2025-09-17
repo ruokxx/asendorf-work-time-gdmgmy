@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, commonStyles } from '../styles/commonStyles';
@@ -12,14 +12,20 @@ interface WorkTimeFormProps {
   initialData?: Partial<WorkTimeEntry>;
   defaultStartTime?: string;
   defaultEndTime?: string;
+  showSaveButton?: boolean;
 }
 
-const WorkTimeForm: React.FC<WorkTimeFormProps> = ({
+export interface WorkTimeFormRef {
+  save: () => void;
+}
+
+const WorkTimeForm = forwardRef<WorkTimeFormRef, WorkTimeFormProps>(({
   onSave,
   initialData,
   defaultStartTime = '08:00',
   defaultEndTime = '16:30',
-}) => {
+  showSaveButton = true,
+}, ref) => {
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
   const [startTime, setStartTime] = useState(initialData?.startTime || defaultStartTime);
   const [endTime, setEndTime] = useState(initialData?.endTime || defaultEndTime);
@@ -58,13 +64,20 @@ const WorkTimeForm: React.FC<WorkTimeFormProps> = ({
       notes,
     });
 
-    // Reset form
-    setDate(new Date().toISOString().split('T')[0]);
-    setStartTime(defaultStartTime);
-    setEndTime(defaultEndTime);
-    setHasBreak(false);
-    setNotes('');
+    // Only reset form if not editing (no initial data)
+    if (!initialData) {
+      setDate(new Date().toISOString().split('T')[0]);
+      setStartTime(defaultStartTime);
+      setEndTime(defaultEndTime);
+      setHasBreak(false);
+      setNotes('');
+    }
   };
+
+  // Expose save method to parent component
+  useImperativeHandle(ref, () => ({
+    save: handleSave,
+  }));
 
   const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(':').map(Number);
@@ -89,7 +102,11 @@ const WorkTimeForm: React.FC<WorkTimeFormProps> = ({
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.container}>
-        <Text style={commonStyles.subtitle}>Arbeitszeit erfassen</Text>
+        {showSaveButton && (
+          <Text style={commonStyles.subtitle}>
+            {initialData ? 'Arbeitszeit bearbeiten' : 'Arbeitszeit erfassen'}
+          </Text>
+        )}
         
         <View style={styles.formGroup}>
           <Text style={styles.label}>Datum</Text>
@@ -148,15 +165,17 @@ const WorkTimeForm: React.FC<WorkTimeFormProps> = ({
           />
         </View>
 
-        <Button
-          text="Arbeitszeit speichern"
-          onPress={handleSave}
-          style={styles.saveButton}
-        />
+        {showSaveButton && (
+          <Button
+            text={initialData ? 'Änderungen speichern' : 'Arbeitszeit speichern'}
+            onPress={handleSave}
+            style={styles.saveButton}
+          />
+        )}
       </View>
     </ScrollView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   scrollContainer: {
